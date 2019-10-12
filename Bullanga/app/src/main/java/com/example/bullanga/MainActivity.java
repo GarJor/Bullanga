@@ -45,6 +45,9 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         initialWork();
         exqListener();
+        if(wifiManager.isWifiEnabled()) {
+            btnDiscover.performClick();
+        }
     }
 
     private void exqListener() {
@@ -56,6 +59,7 @@ public class MainActivity extends AppCompatActivity {
                     btnOnOff.setText("ON");
                 } else {
                     wifiManager.setWifiEnabled(true);
+                    btnDiscover.performClick();
                     btnOnOff.setText("OFF");
                 }
             }
@@ -65,6 +69,7 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void onClick(View view) {
+                listView.setAdapter(null);
                 mManager.discoverPeers(mChannel, new WifiP2pManager.ActionListener() {
                     @Override
                     public void onSuccess() {
@@ -120,7 +125,7 @@ public class MainActivity extends AppCompatActivity {
                     index++;
                 }
 
-                ArrayAdapter<String> adapter=new ArrayAdapter<String>(getApplicationContext(), android.R.layout.simple_expandable_list_item_1, deviceNameArray);
+                ArrayAdapter<String> adapter = new ArrayAdapter<String>(getApplicationContext(), android.R.layout.simple_expandable_list_item_1, deviceNameArray);
                 listView.setAdapter(adapter);
             }
 
