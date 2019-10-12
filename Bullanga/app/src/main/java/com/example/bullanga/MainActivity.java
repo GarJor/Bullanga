@@ -1,10 +1,18 @@
 package com.example.bullanga;
 
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.IntentFilter;
+import android.content.pm.PackageManager;
+import android.location.Criteria;
+import android.location.LocationListener;
+import android.location.LocationManager;
 import android.net.wifi.WifiManager;
 import android.net.wifi.p2p.WifiP2pDevice;
 import android.net.wifi.p2p.WifiP2pDeviceList;
@@ -21,12 +29,17 @@ import android.widget.Toast;
 import java.util.ArrayList;
 import java.util.List;
 
+import android.Manifest;
+
 public class MainActivity extends AppCompatActivity {
 
     Button btnOnOff, btnDiscover, btnSend;
     ListView listView;
     TextView read_msg_box, connectionStatus;
     EditText writeMsg;
+
+    LocationManager locationManager;
+    String provider;
 
     WifiManager wifiManager;
     WifiP2pManager mManager;
@@ -39,8 +52,87 @@ public class MainActivity extends AppCompatActivity {
     String[] deviceNameArray;
     WifiP2pDevice[] deviceArray;
 
+    public static final int MY_PERMISSIONS_REQUEST_LOCATION = 99;
+
+    public boolean checkLocationPermission() {
+        if (ContextCompat.checkSelfPermission(this,
+
+                Manifest.permission.ACCESS_COARSE_LOCATION)
+                != PackageManager.PERMISSION_GRANTED) {
+
+            // Should we show an explanation?
+            if (ActivityCompat.shouldShowRequestPermissionRationale(this,
+                    Manifest.permission.ACCESS_COARSE_LOCATION)) {
+
+                // Show an explanation to the user *asynchronously* -- don't block
+                // this thread waiting for the user's response! After the user
+                // sees the explanation, try again to request the permission.
+                new AlertDialog.Builder(this)
+                        .setTitle("Necessitem Permissos de Localització")
+                        .setMessage("Per fer funcionar la APP és estrictament encessari engegar la localització per obligació imperativa d'android, ens sap greu.")
+                        .setPositiveButton("Puta mare tron", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialogInterface, int i) {
+                                //Prompt the user once explanation has been shown
+                                ActivityCompat.requestPermissions(MainActivity.this,
+                                        new String[]{Manifest.permission.ACCESS_COARSE_LOCATION},
+                                        MY_PERMISSIONS_REQUEST_LOCATION);
+                            }
+                        })
+                        .create()
+                        .show();
+
+
+            } else {
+                // No explanation needed, we can request the permission.
+                ActivityCompat.requestPermissions(this,
+                        new String[]{Manifest.permission.ACCESS_COARSE_LOCATION},
+                        MY_PERMISSIONS_REQUEST_LOCATION);
+            }
+            return false;
+        } else {
+            return true;
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode,
+                                           String permissions[], int[] grantResults) {
+        switch (requestCode) {
+            case MY_PERMISSIONS_REQUEST_LOCATION: {
+                // If request is cancelled, the result arrays are empty.
+                if (grantResults.length > 0
+                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+
+                    // permission was granted, yay! Do the
+                    // location-related task you need to do.
+                    if (ContextCompat.checkSelfPermission(this,
+                            Manifest.permission.ACCESS_COARSE_LOCATION)
+                            == PackageManager.PERMISSION_GRANTED) {
+
+                        //Request location updates:
+                        //locationManager.requestLocationUpdates(provider, 400, 1, (LocationListener) this);
+                    }
+
+                } else {
+
+                    // permission denied, boo! Disable the
+                    // functionality that depends on this permission.
+
+                }
+                return;
+            }
+
+        }
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+
+        provider = locationManager.getBestProvider(new Criteria(), false);
+
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         initialWork();
@@ -48,6 +140,7 @@ public class MainActivity extends AppCompatActivity {
         if(wifiManager.isWifiEnabled()) {
             btnDiscover.performClick();
         }
+        checkLocationPermission();
     }
 
     private void exqListener() {
