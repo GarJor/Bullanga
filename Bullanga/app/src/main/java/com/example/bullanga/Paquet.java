@@ -54,7 +54,7 @@ public class Paquet {  //classe del fucking paquet
     public String getMacReceptor(){
         return this.header.receptor;
     }
-    public String Parse(){
+    public String parse(){
         Gson gson = new Gson();
         return gson.toJson(this);
     }
