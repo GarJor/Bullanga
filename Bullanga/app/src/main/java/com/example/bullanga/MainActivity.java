@@ -131,7 +131,8 @@ public class MainActivity extends AppCompatActivity {
         locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
 
         provider = locationManager.getBestProvider(new Criteria(), false);
-
+        Buffer SenderBuffer = new Buffer();
+        Buffer RecieverBuffer = new Buffer();
 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);

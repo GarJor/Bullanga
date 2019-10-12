@@ -5,10 +5,10 @@ import com.google.gson.Gson;
 import java.util.LinkedList;
 import java.util.Queue;
 
-public class BufferEnvio {
+public class Buffer {
 private Queue<String>  cua;
 
-    public BufferEnvio(){
+    public Buffer(){
         cua = new LinkedList<>();
     }
 
