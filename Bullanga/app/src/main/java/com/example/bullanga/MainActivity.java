@@ -59,8 +59,9 @@ public class MainActivity extends AppCompatActivity {
     List<WifiP2pDevice> peers=new ArrayList<WifiP2pDevice>();
     String[] deviceNameArray;
     WifiP2pDevice[] deviceArray;
-    Boolean connect = false;
+    Boolean owner = false;
     WifiP2pConfig config=new WifiP2pConfig();
+
 
 
     public static final int MY_PERMISSIONS_REQUEST_LOCATION = 99;
@@ -260,10 +261,10 @@ public class MainActivity extends AppCompatActivity {
 
 
                     }
-                    if(device.isGroupOwner()) {
+                    if(device.isGroupOwner()) alias+=" (GO)";
 
 
-                        alias+=" (A)";
+
 
 
                         config.deviceAddress=device.deviceAddress;
@@ -272,8 +273,8 @@ public class MainActivity extends AppCompatActivity {
                             mManager.connect(mChannel, config, new WifiP2pManager.ActionListener() {
                                 @Override
                                 public void onSuccess() {
-                                    Toast.makeText(getApplicationContext(), "Connected to " + device.deviceName, Toast.LENGTH_SHORT).show();
-                                    connect = true;
+                                    //Toast.makeText(getApplicationContext(), "Connected to " + device.deviceName, Toast.LENGTH_SHORT).show();
+
                                     config.groupOwnerIntent = 15;
 
                                 }
@@ -281,13 +282,13 @@ public class MainActivity extends AppCompatActivity {
                                 @Override
                                 public void onFailure(int reason) {
 
-                                    Toast.makeText(getApplicationContext(), "Not Connected", Toast.LENGTH_SHORT).show();
-                                    connect = false;
+                                    //Toast.makeText(getApplicationContext(), "Not Connected", Toast.LENGTH_SHORT).show();
+
                                     config.groupOwnerIntent = 15;
                                 }
                             });
                         }
-                    }
+
                     deviceNameArray[index] =alias;
                     deviceArray[index] = device;
                     index++;
@@ -311,10 +312,11 @@ public class MainActivity extends AppCompatActivity {
 
             if (wifiP2pInfo.groupFormed && wifiP2pInfo.isGroupOwner) {
                 connectionStatus.setText("Sóc Owner del grup");
-
+                owner=true;
 
             } else if (wifiP2pInfo.groupFormed) {
                 connectionStatus.setText("Client");
+                owner=false;
 
             }
         }
