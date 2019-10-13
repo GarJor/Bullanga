@@ -72,6 +72,7 @@ public class MainActivity extends AppCompatActivity {
     WifiP2pDevice[] deviceArray;
     Boolean owner = false;
     WifiP2pConfig config=new WifiP2pConfig();
+    Boolean connected = false;
 
 
 
@@ -246,6 +247,7 @@ public class MainActivity extends AppCompatActivity {
                 deviceNameArray=new String[peerList.getDeviceList().size()];
                 deviceArray = new WifiP2pDevice[peerList.getDeviceList().size()];
                 int index = 0;
+                connected = false;
                 for(final WifiP2pDevice device : peerList.getDeviceList()) {
 
                     String alias =  device.deviceName+"  -  ";
@@ -257,6 +259,7 @@ public class MainActivity extends AppCompatActivity {
 
                         case WifiP2pDevice.CONNECTED:
                             alias+="CONNECTED";
+                            connected=true;
                             break;
 
                         case WifiP2pDevice.FAILED:
@@ -294,20 +297,25 @@ public class MainActivity extends AppCompatActivity {
                                     handler.postDelayed(new Runnable() {
                                         @Override
                                         public void run() {
-                                            Toast.makeText(getApplicationContext(), "Ha sonat l'alarma, em faré owner",
-                                                    Toast.LENGTH_LONG).show();
-                                            mManager.createGroup(mChannel, new WifiP2pManager.ActionListener() {
-                                                @Override
-                                                public void onSuccess() {
-                                                    // Device is ready to accept incoming connections from peers.
-                                                }
+                                            if(!connected) {
+                                                Toast.makeText(getApplicationContext(), "Ha sonat l'alarma, em faré owner",
+                                                        Toast.LENGTH_LONG).show();
+                                                mManager.createGroup(mChannel, new WifiP2pManager.ActionListener() {
+                                                    @Override
+                                                    public void onSuccess() {
+                                                        // Device is ready to accept incoming connections from peers.
+                                                    }
 
-                                                @Override
-                                                public void onFailure(int reason) {
-                                                    Toast.makeText(getApplicationContext(), "P2P group creation failed. Retry.",
-                                                            Toast.LENGTH_SHORT).show();
-                                                }
-                                            });
+                                                    @Override
+                                                    public void onFailure(int reason) {
+                                                        Toast.makeText(getApplicationContext(), "P2P group creation failed. Retry.",
+                                                                Toast.LENGTH_SHORT).show();
+                                                    }
+                                                });
+                                            } else {
+                                                Toast.makeText(getApplicationContext(), "Segueixo conectat al GO! :)",
+                                                        Toast.LENGTH_LONG).show();
+                                            }
 
 
                                         }
@@ -357,49 +365,49 @@ public class MainActivity extends AppCompatActivity {
                 connectionStatus.setText("Client");
                 owner=false;
 
-                ServerSocket server = null;
-                try {
-                    server = new ServerSocket(8888);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
+//                ServerSocket server = null;
+//                try {
+//                    server = new ServerSocket(8888);
+//                } catch (IOException e) {
+//                    e.printStackTrace();
+//                }
                 //keep listens indefinitely until receives 'exit' call or program terminates
-                while(true){
-
-                    String message = null;
-                    try {
-                        System.out.println("Waiting for the client request");
-                        //creating socket and waiting for client connection
-                        Socket socket = server.accept();
-                        //read from socket to ObjectInputStream object
-                        ObjectInputStream ois = new ObjectInputStream(socket.getInputStream());
-                        //convert ObjectInputStream object to String
-                        message = (String) ois.readObject();
-                        System.out.println("Message Received: " + message);
-                        read_msg_box.setText(message);
-                        //create ObjectOutputStream object
-                        ObjectOutputStream oos = new ObjectOutputStream(socket.getOutputStream());
-                        //write object to Socket
-                        oos.writeObject("Hi Client "+message);
-                        //close resources
-                        ois.close();
-                        oos.close();
-                        socket.close();
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    } catch (ClassNotFoundException e) {
-                        e.printStackTrace();
-                    }
-                    //terminate the server if client sends exit request
-                    if(message.equalsIgnoreCase("exit")) break;
-                }
-                System.out.println("Shutting down Socket server!!");
-                //close the ServerSocket object
-                try {
-                    server.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
+//                while(true){
+//
+//                    String message = null;
+//                    try {
+//                        System.out.println("Waiting for the client request");
+//                        //creating socket and waiting for client connection
+//                        Socket socket = server.accept();
+//                        //read from socket to ObjectInputStream object
+//                        ObjectInputStream ois = new ObjectInputStream(socket.getInputStream());
+//                        //convert ObjectInputStream object to String
+//                        message = (String) ois.readObject();
+//                        System.out.println("Message Received: " + message);
+//                        read_msg_box.setText(message);
+//                        //create ObjectOutputStream object
+//                        ObjectOutputStream oos = new ObjectOutputStream(socket.getOutputStream());
+//                        //write object to Socket
+//                        oos.writeObject("Hi Client "+message);
+//                        //close resources
+//                        ois.close();
+//                        oos.close();
+//                        socket.close();
+//                    } catch (IOException e) {
+//                        e.printStackTrace();
+//                    } catch (ClassNotFoundException e) {
+//                        e.printStackTrace();
+//                    }
+//                    //terminate the server if client sends exit request
+//                    if(message.equalsIgnoreCase("exit")) break;
+//                }
+//                System.out.println("Shutting down Socket server!!");
+//                //close the ServerSocket object
+//                try {
+//                    server.close();
+//                } catch (IOException e) {
+//                    e.printStackTrace();
+//                }
             }
         }
     };
