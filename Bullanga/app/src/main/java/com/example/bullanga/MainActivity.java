@@ -73,7 +73,7 @@ public class MainActivity extends AppCompatActivity {
     Boolean owner = false;
     WifiP2pConfig config=new WifiP2pConfig();
     Boolean connected = false;
-
+    String GOAddress = "";
 
 
     public static final int MY_PERMISSIONS_REQUEST_LOCATION = 99;
@@ -260,6 +260,7 @@ public class MainActivity extends AppCompatActivity {
                         case WifiP2pDevice.CONNECTED:
                             alias+="CONNECTED";
                             connected=true;
+
                             break;
 
                         case WifiP2pDevice.FAILED:
@@ -304,6 +305,7 @@ public class MainActivity extends AppCompatActivity {
                                                     @Override
                                                     public void onSuccess() {
                                                         // Device is ready to accept incoming connections from peers.
+
                                                     }
 
                                                     @Override
@@ -312,11 +314,7 @@ public class MainActivity extends AppCompatActivity {
                                                                 Toast.LENGTH_SHORT).show();
                                                     }
                                                 });
-                                            } else {
-                                                Toast.makeText(getApplicationContext(), "Segueixo conectat al GO! :)",
-                                                        Toast.LENGTH_LONG).show();
                                             }
-
 
                                         }
                                     }, n);
@@ -360,9 +358,12 @@ public class MainActivity extends AppCompatActivity {
             if (wifiP2pInfo.groupFormed && wifiP2pInfo.isGroupOwner) {
                 connectionStatus.setText("Sóc Owner del grup");
                 owner=true;
+//                Server server = new Server();
+//                server.start();
 
             } else if (wifiP2pInfo.groupFormed) {
                 connectionStatus.setText("Client");
+                GOAddress=groupOwnerAddress.getHostAddress();
                 owner=false;
 
 //                ServerSocket server = null;
