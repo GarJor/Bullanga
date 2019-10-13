@@ -152,8 +152,8 @@ public class MainActivity extends AppCompatActivity {
 //            btnDiscover.performClick();
 //        }
         checkLocationPermission();
-        Server serversk = new Server(read_msg_box);
-        serversk.run(9999);
+//        Server serversk = new Server(read_msg_box);
+//        serversk.run(9999);
 
     }
 
@@ -193,32 +193,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                final WifiP2pDevice device=deviceArray[i];
 
-                config.deviceAddress=device.deviceAddress;
-                config.groupOwnerIntent = 0;
-
-                mManager.connect(mChannel, config, new WifiP2pManager.ActionListener() {
-                    @Override
-                    public void onSuccess() {
-                        Toast.makeText(getApplicationContext(), "Connected to "+device.deviceName,Toast.LENGTH_SHORT).show();
-                        connect = true;
-                        config.groupOwnerIntent = 15;
-                    }
-
-                    @Override
-                    public void onFailure(int reason) {
-
-                        Toast.makeText(getApplicationContext(), "Not Connected",Toast.LENGTH_SHORT).show();
-                        connect = false;
-                        config.groupOwnerIntent = 15;
-                    }
-                });
-            }
-        });
 
 
     }
@@ -258,8 +233,61 @@ public class MainActivity extends AppCompatActivity {
                 deviceNameArray=new String[peerList.getDeviceList().size()];
                 deviceArray = new WifiP2pDevice[peerList.getDeviceList().size()];
                 int index = 0;
-                for(WifiP2pDevice device : peerList.getDeviceList()) {
-                    deviceNameArray[index] = device.deviceName;
+                for(final WifiP2pDevice device : peerList.getDeviceList()) {
+
+                    String alias =  device.deviceName+"  -  ";
+                    switch (device.status){
+                        case WifiP2pDevice.AVAILABLE:
+                            alias+="AVAILABLE";
+
+                            break;
+
+                        case WifiP2pDevice.CONNECTED:
+                            alias+="CONNECTED";
+                            break;
+
+                        case WifiP2pDevice.FAILED:
+                            alias+="FAILED";
+                            break;
+
+                        case WifiP2pDevice.INVITED:
+                            alias+="INVITED";
+                            break;
+
+                        case WifiP2pDevice.UNAVAILABLE:
+                            alias+="UNAVAILABLE";
+                            break;
+
+
+                    }
+                    if(device.isGroupOwner()) {
+
+
+                        alias+=" (A)";
+
+
+                        config.deviceAddress=device.deviceAddress;
+                        config.groupOwnerIntent = 0;
+                        if(device.status!=WifiP2pDevice.AVAILABLE) {
+                            mManager.connect(mChannel, config, new WifiP2pManager.ActionListener() {
+                                @Override
+                                public void onSuccess() {
+                                    Toast.makeText(getApplicationContext(), "Connected to " + device.deviceName, Toast.LENGTH_SHORT).show();
+                                    connect = true;
+                                    config.groupOwnerIntent = 15;
+                                }
+
+                                @Override
+                                public void onFailure(int reason) {
+
+                                    Toast.makeText(getApplicationContext(), "Not Connected", Toast.LENGTH_SHORT).show();
+                                    connect = false;
+                                    config.groupOwnerIntent = 15;
+                                }
+                            });
+                        }
+                    }
+                    deviceNameArray[index] =alias;
                     deviceArray[index] = device;
                     index++;
                 }
