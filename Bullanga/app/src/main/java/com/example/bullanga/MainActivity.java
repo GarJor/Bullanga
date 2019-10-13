@@ -20,7 +20,9 @@ import android.net.wifi.p2p.WifiP2pDevice;
 import android.net.wifi.p2p.WifiP2pDeviceList;
 import android.net.wifi.p2p.WifiP2pInfo;
 import android.net.wifi.p2p.WifiP2pManager;
+import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Message;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -31,8 +33,16 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 
+import java.io.BufferedReader;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
 import java.net.InetAddress;
 
+import java.net.ServerSocket;
+import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -60,6 +70,8 @@ public class MainActivity extends AppCompatActivity {
     WifiP2pDevice[] deviceArray;
     Boolean connect = false;
     WifiP2pConfig config=new WifiP2pConfig();
+    String Text = "";
+    String Ip;
 
 
     public static final int MY_PERMISSIONS_REQUEST_LOCATION = 99;
@@ -138,12 +150,15 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+        System.out.println("HOLAAAAAAAAAAAAAAAAAAAAAAAA");
+
         locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
 
         provider = locationManager.getBestProvider(new Criteria(), false);
 
 
-        super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         initialWork();
         exqListener();
@@ -151,6 +166,11 @@ public class MainActivity extends AppCompatActivity {
 //            btnDiscover.performClick();
 //        }
         checkLocationPermission();
+        System.out.println("HOLAAAAAAAAAAAAAAAAAAAAAAAA");
+        Thread th = new Thread() {
+            initializeListener Listener = new initializeListener();
+        };
+        th.start();
     }
 
 
@@ -186,6 +206,8 @@ public class MainActivity extends AppCompatActivity {
                         connectionStatus.setText("Discovery Starting Failed");
                     }
                 });
+                read_msg_box.setText(read_msg_box.getText().toString() + "\n" + Text);
+                Text = "";
             }
         });
 
@@ -216,7 +238,16 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-
+        btnSend.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                for (int i = 0; i < deviceArray.length; i++) {
+                    System.out.print("Envia Broadcast");
+                    MessageSender MessageSender = new MessageSender(Ip);
+                    MessageSender.execute(writeMsg.getText().toString());
+                }
+            }
+        });
     }
 
     private void initialWork() {
@@ -277,6 +308,7 @@ public class MainActivity extends AppCompatActivity {
 
 
             final InetAddress groupOwnerAddress = wifiP2pInfo.groupOwnerAddress;
+            Ip = wifiP2pInfo.groupOwnerAddress.getHostAddress();
 
             if (wifiP2pInfo.groupFormed && wifiP2pInfo.isGroupOwner) {
                 connectionStatus.setText("Host");
@@ -300,11 +332,5 @@ public class MainActivity extends AppCompatActivity {
         super.onPause();
         unregisterReceiver(mReceiver);
     }
-
-
-
-
-
-
 
 }
