@@ -268,7 +268,7 @@ public class MainActivity extends AppCompatActivity {
 
                         config.deviceAddress=device.deviceAddress;
                         config.groupOwnerIntent = 0;
-                        if(device.status!=WifiP2pDevice.AVAILABLE) {
+                        if(device.status==WifiP2pDevice.AVAILABLE) {
                             mManager.connect(mChannel, config, new WifiP2pManager.ActionListener() {
                                 @Override
                                 public void onSuccess() {
