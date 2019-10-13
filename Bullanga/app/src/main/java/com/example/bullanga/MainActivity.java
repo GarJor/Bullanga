@@ -9,6 +9,7 @@ import androidx.core.content.ContextCompat;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.location.Criteria;
@@ -151,6 +152,9 @@ public class MainActivity extends AppCompatActivity {
 //            btnDiscover.performClick();
 //        }
         checkLocationPermission();
+        Server serversk = new Server(read_msg_box);
+        serversk.run(9999);
+
     }
 
 
