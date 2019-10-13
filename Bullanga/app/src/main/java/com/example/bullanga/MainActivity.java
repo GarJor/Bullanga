@@ -6,6 +6,8 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
+import android.app.AlarmManager;
+import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -22,6 +24,7 @@ import android.net.wifi.p2p.WifiP2pDeviceList;
 import android.net.wifi.p2p.WifiP2pInfo;
 import android.net.wifi.p2p.WifiP2pManager;
 import android.os.Bundle;
+import android.os.Handler;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -32,10 +35,18 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.net.InetAddress;
 
+import java.net.ServerSocket;
+import java.net.Socket;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
+import java.util.Random;
 
 import android.Manifest;
 
@@ -61,6 +72,7 @@ public class MainActivity extends AppCompatActivity {
     WifiP2pDevice[] deviceArray;
     Boolean connect = false;
     WifiP2pConfig config=new WifiP2pConfig();
+
 
 
     public static final int MY_PERMISSIONS_REQUEST_LOCATION = 99;
@@ -183,6 +195,7 @@ public class MainActivity extends AppCompatActivity {
                     @Override
                     public void onSuccess() {
                         connectionStatus.setText("Discovery Started");
+
                     }
 
                     @Override
@@ -275,6 +288,30 @@ public class MainActivity extends AppCompatActivity {
                                     Toast.makeText(getApplicationContext(), "Connected to " + device.deviceName, Toast.LENGTH_SHORT).show();
                                     connect = true;
                                     config.groupOwnerIntent = 15;
+                                    Random rand = new Random();
+                                    int n = rand.nextInt((30000 - 10000) + 1) + 10000;
+                                    final Handler handler = new Handler();
+                                    handler.postDelayed(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            Toast.makeText(getApplicationContext(), "Ha sonat l'alarma, em faré owner",
+                                                    Toast.LENGTH_LONG).show();
+                                            mManager.createGroup(mChannel, new WifiP2pManager.ActionListener() {
+                                                @Override
+                                                public void onSuccess() {
+                                                    // Device is ready to accept incoming connections from peers.
+                                                }
+
+                                                @Override
+                                                public void onFailure(int reason) {
+                                                    Toast.makeText(getApplicationContext(), "P2P group creation failed. Retry.",
+                                                            Toast.LENGTH_SHORT).show();
+                                                }
+                                            });
+
+
+                                        }
+                                    }, n);
 
                                 }
 
@@ -304,6 +341,9 @@ public class MainActivity extends AppCompatActivity {
         }
     };
 
+
+
+
     WifiP2pManager.ConnectionInfoListener connectionInfoListener=new WifiP2pManager.ConnectionInfoListener() {
         @Override
         public void onConnectionInfoAvailable(WifiP2pInfo wifiP2pInfo) {
@@ -315,7 +355,49 @@ public class MainActivity extends AppCompatActivity {
 
             } else if (wifiP2pInfo.groupFormed) {
                 connectionStatus.setText("Client");
+                ServerSocket server = null;
+                try {
+                    server = new ServerSocket(8888);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                //keep listens indefinitely until receives 'exit' call or program terminates
+                while(true){
 
+                    String message = null;
+                    try {
+                        System.out.println("Waiting for the client request");
+                        //creating socket and waiting for client connection
+                        Socket socket = server.accept();
+                        //read from socket to ObjectInputStream object
+                        ObjectInputStream ois = new ObjectInputStream(socket.getInputStream());
+                        //convert ObjectInputStream object to String
+                        message = (String) ois.readObject();
+                        System.out.println("Message Received: " + message);
+                        read_msg_box.setText(message);
+                        //create ObjectOutputStream object
+                        ObjectOutputStream oos = new ObjectOutputStream(socket.getOutputStream());
+                        //write object to Socket
+                        oos.writeObject("Hi Client "+message);
+                        //close resources
+                        ois.close();
+                        oos.close();
+                        socket.close();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    } catch (ClassNotFoundException e) {
+                        e.printStackTrace();
+                    }
+                    //terminate the server if client sends exit request
+                    if(message.equalsIgnoreCase("exit")) break;
+                }
+                System.out.println("Shutting down Socket server!!");
+                //close the ServerSocket object
+                try {
+                    server.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
             }
         }
     };
