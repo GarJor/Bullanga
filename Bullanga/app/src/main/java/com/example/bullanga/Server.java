@@ -24,6 +24,7 @@ public class Server extends Thread {
 
         public Server(TextView textView) {
             this.textView = textView;
+            this.run(8888);
         }
 
         public void closeServer() {

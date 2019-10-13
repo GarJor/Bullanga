@@ -268,13 +268,14 @@ public class MainActivity extends AppCompatActivity {
 
                         config.deviceAddress=device.deviceAddress;
                         config.groupOwnerIntent = 0;
-                        if(device.status!=WifiP2pDevice.AVAILABLE) {
+                        if(device.status==WifiP2pDevice.AVAILABLE) {
                             mManager.connect(mChannel, config, new WifiP2pManager.ActionListener() {
                                 @Override
                                 public void onSuccess() {
                                     Toast.makeText(getApplicationContext(), "Connected to " + device.deviceName, Toast.LENGTH_SHORT).show();
                                     connect = true;
                                     config.groupOwnerIntent = 15;
+
                                 }
 
                                 @Override
@@ -306,12 +307,10 @@ public class MainActivity extends AppCompatActivity {
     WifiP2pManager.ConnectionInfoListener connectionInfoListener=new WifiP2pManager.ConnectionInfoListener() {
         @Override
         public void onConnectionInfoAvailable(WifiP2pInfo wifiP2pInfo) {
-
-
             final InetAddress groupOwnerAddress = wifiP2pInfo.groupOwnerAddress;
 
             if (wifiP2pInfo.groupFormed && wifiP2pInfo.isGroupOwner) {
-                connectionStatus.setText("Host");
+                connectionStatus.setText("Sóc Owner del grup");
 
 
             } else if (wifiP2pInfo.groupFormed) {
